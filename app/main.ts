@@ -9,6 +9,11 @@ const rl = createInterface({
 // TODO: Uncomment the code below to pass the first stage
 rl.prompt();
 rl.on("line", (input) => {
+  if (input.startsWith("echo ")) {
+    console.log(input.slice(5));
+    rl.prompt();
+    return;
+  }
   if (input === "exit") {
     rl.close();
     return;
