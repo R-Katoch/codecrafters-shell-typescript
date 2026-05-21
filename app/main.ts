@@ -3,8 +3,8 @@ import { CommandRegistry } from './command-executer';
 
 import { EchoCommand } from './commands';
 import { ExitCommand } from './commands';
+import { TypeCommand } from "./commands";
 import type { CommandContext } from "./types";
-import { TypeCommand } from "./commands/builtins/type/type";
 
 const registry = new CommandRegistry();
 
