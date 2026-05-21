@@ -1,21 +1,22 @@
+import type { CommandName } from '../enums';
 import type { Command } from '../types';
 
 export class CommandRegistry {
-  private commands = new Map<string, Command>();
+  private commands = new Map<CommandName, Command>();
 
   register(command: Command) {
     this.commands.set(command.name, command);
   }
 
-  resolve(name: string): Command | undefined {
+  resolve(name: CommandName): Command | undefined {
     return this.commands.get(name);
   }
 
-  get(name: string) {
+  get(name: CommandName) {
     return this.commands.get(name);
   }
 
-  isBuiltin(name: string): boolean {
+  isBuiltin(name: CommandName): boolean {
     return this.commands.has(name);
   }
 }
