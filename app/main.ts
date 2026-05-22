@@ -6,7 +6,8 @@ import { ExitCommand } from './commands';
 import { TypeCommand } from "./commands";
 import { PwdCommand } from "./commands";
 import { CdCommand } from "./commands";
-import { resolveFromPath, runExternalCommand } from "./helper";
+import { resolveFromPath, runExternalCommand, tokenize } from "./helper";
+import type { CommandName } from "./enums";
 
 const registry = new CommandRegistry();
 
@@ -31,10 +32,10 @@ rl.on("line", async (input: string) => {
 
 
 export async function handleInput(input: string) {
-  const [commandName, ...args] = input.split(" ");
+  const [commandName, ...args] = tokenize(input);
 
   // 1. builtin
-  const builtin = registry.get(commandName);
+  const builtin = registry.get(commandName as CommandName);
 
   if (builtin) {
     await builtin.execute({ args });
