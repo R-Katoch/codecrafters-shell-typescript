@@ -5,6 +5,7 @@ import { EchoCommand } from './commands';
 import { ExitCommand } from './commands';
 import { TypeCommand } from "./commands";
 import { PwdCommand } from "./commands";
+import { CdCommand } from "./commands";
 import { resolveFromPath, runExternalCommand } from "./helper";
 
 const registry = new CommandRegistry();
@@ -13,6 +14,7 @@ registry.register(new EchoCommand());
 registry.register(new ExitCommand());
 registry.register(new TypeCommand(registry));
 registry.register(new PwdCommand());
+registry.register(new CdCommand());
 
 const rl = createInterface({
   input: process.stdin,
