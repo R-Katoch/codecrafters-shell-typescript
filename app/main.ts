@@ -23,6 +23,7 @@ const rl = createInterface({
 rl.prompt();
 rl.on("line", async (input: string) => {
   await handleInput(input);
+  rl.prompt();
 });
 
 
@@ -47,5 +48,4 @@ export async function handleInput(input: string) {
 
   // 3. not found
   console.log(`${commandName}: command not found`);
-  rl.prompt();
 }
