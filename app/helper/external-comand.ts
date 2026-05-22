@@ -2,13 +2,20 @@ import { spawn } from "child_process";
 
 export function runExternalCommand(
   executablePath: string,
-  args: string[]
-) {
-  const child = spawn(executablePath, args, {
-    stdio: "inherit",
-  });
-
-  child.on("error", (err) => {
-    console.error(err.message);
+  commandName: string,
+  args: string[],
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(executablePath, args, {
+      argv0: commandName,
+      stdio: "inherit",
+    });
+    child.on("error", (err) => {
+      console.error(err.message);
+      reject(err);
+    });
+    child.on("close", (code) => {
+      resolve();
+    });
   });
 }

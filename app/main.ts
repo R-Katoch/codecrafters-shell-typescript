@@ -21,20 +21,19 @@ const rl = createInterface({
 
 // TODO: Uncomment the code below to pass the first stage
 rl.prompt();
-rl.on("line", (input: string) => {
-  handleInput(input);
-  rl.prompt();
+rl.on("line", async (input: string) => {
+  await handleInput(input);
 });
 
 
-export function handleInput(input: string) {
+export async function handleInput(input: string) {
   const [commandName, ...args] = input.split(" ");
 
   // 1. builtin
   const builtin = registry.get(commandName);
 
   if (builtin) {
-    builtin.execute({ args });
+    await builtin.execute({ args });
     return;
   }
 
@@ -42,10 +41,11 @@ export function handleInput(input: string) {
   const executable = resolveFromPath(commandName);
 
   if (executable) {
-    runExternalCommand(executable, args);
+    await runExternalCommand(executable, commandName, args);
     return;
   }
 
   // 3. not found
   console.log(`${commandName}: command not found`);
+  rl.prompt();
 }
