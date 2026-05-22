@@ -3,6 +3,7 @@ export function tokenize(input: string): string[] {
 
   let current = "";
   let inSingleQuote = false;
+  let inDoubleQuote = false;
 
   for (let i = 0; i < input.length; i++) {
     const char = input[i];
@@ -13,8 +14,13 @@ export function tokenize(input: string): string[] {
       continue;
     }
 
+    if (char === '"') {
+      inDoubleQuote = !inDoubleQuote;
+      continue;
+    }
+
     // whitespace outside quotes
-    if (char === " " && !inSingleQuote) {
+    if (char === " " && !inSingleQuote && !inDoubleQuote) {
       if (current.length > 0) {
         tokens.push(current);
         current = "";
