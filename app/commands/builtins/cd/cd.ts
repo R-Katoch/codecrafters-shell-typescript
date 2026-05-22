@@ -3,7 +3,7 @@ import type { Command, CommandContext } from '../../../types';
 export class CdCommand implements Command {
     readonly name = 'cd';
     execute({ args }: CommandContext) {
-        if (args.length === 0) {
+        if (args.length === 0 || args[0] === '~') {
             // No arguments, change to home directory
             const homeDir = process.env.HOME || process.env.USERPROFILE; // For Windows compatibility
             if (homeDir) {
