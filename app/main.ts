@@ -5,6 +5,7 @@ import { EchoCommand } from './commands';
 import { ExitCommand } from './commands';
 import { TypeCommand } from "./commands";
 import type { CommandContext } from "./types";
+import { resolveFromPath, runExternalCommand } from "./helper";
 
 const registry = new CommandRegistry();
 
@@ -29,12 +30,22 @@ rl.on("line", (input: string) => {
 export function handleInput(input: string) {
   const [commandName, ...args] = input.split(" ");
 
-  const command = registry.get(commandName);
+  // 1. builtin
+  const builtin = registry.get(commandName);
 
-  if (!command) {
-    console.log(`${commandName}: command not found`);
+  if (builtin) {
+    builtin.execute({ args });
     return;
   }
 
-  command.execute({ args } as CommandContext);
+  // 2. external executable
+  const executable = resolveFromPath(commandName);
+
+  if (executable) {
+    runExternalCommand(executable, args);
+    return;
+  }
+
+  // 3. not found
+  console.log(`${commandName}: command not found`);
 }
