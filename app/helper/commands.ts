@@ -1,29 +1,35 @@
 import fs from "fs";
 
+const builtins = ["echo", "exit", "type", "pwd", "cd"];
+
 function getPathExecutables(): string[] {
   const envPath = process.env.PATH || "";
-
   const dirs = envPath.split(":");
 
-  const executables = new Set<string>();
+  const seen = new Set<string>();
+  const result: string[] = [];
 
   for (const dir of dirs) {
     try {
       const files = fs.readdirSync(dir);
 
       for (const file of files) {
-        executables.add(file);
+        if (!seen.has(file)) {
+          seen.add(file);
+          result.push(file);
+        }
       }
     } catch {
       // ignore invalid dirs
     }
   }
 
-  return [...executables];
+  return result;
 }
 
-const builtins = ["echo", "exit", "type", "pwd", "cd"];
+// ✅ IMPORTANT: compute ONCE
+const pathExecutables = getPathExecutables();
 
 export function getAllCommands() {
-  return [...builtins, ...getPathExecutables()];
+  return [...builtins, ...pathExecutables];
 }
