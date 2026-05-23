@@ -4,10 +4,12 @@ import type { Writable } from "stream";
 export function runExternalCommand(
   executablePath: string,
   args: string[],
-  stdout: Writable
+  commandName: string,
+  stdout: Writable,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(executablePath, args, {
+      argv0: commandName,
       stdio: ["inherit", "pipe", "inherit"],
     });
 

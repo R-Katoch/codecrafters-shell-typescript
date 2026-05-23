@@ -33,7 +33,7 @@ export class CommandExecutor {
     const executable = resolveFromPath(command);
 
     if (executable) {
-      await runExternalCommand(executable, args, stdout);
+      await runExternalCommand(executable, args, command, stdout);
 
       return;
     }

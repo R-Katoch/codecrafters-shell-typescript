@@ -6,8 +6,6 @@ import { ExitCommand } from './commands';
 import { TypeCommand } from "./commands";
 import { PwdCommand } from "./commands";
 import { CdCommand } from "./commands";
-import { resolveFromPath, runExternalCommand, tokenize } from "./helper";
-import type { CommandName } from "./enums";
 import { parse } from "./helper/parser/parser";
 import { CommandExecutor } from "./command-executer";
 
