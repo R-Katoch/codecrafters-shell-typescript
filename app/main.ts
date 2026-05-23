@@ -28,9 +28,8 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const hits = commands.filter((cmd) => cmd.startsWith(line));
-
-    return [hits.length ? hits : commands, line];
+    const hits = commands.map((h) => h + " ").filter((c) => c.startsWith(line));
+    return [hits.length ? hits : [], line];
   },
   prompt: "$ ",
 });
