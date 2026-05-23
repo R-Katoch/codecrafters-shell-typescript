@@ -67,6 +67,16 @@ export function parse(input: string): ParsedCommand {
       continue;
     }
 
+    if (token === "1>>") {
+      redirects.push({
+        stream: "stdout",
+        mode: "append",
+        target: tokens[++i],
+      });
+
+      continue;
+    }
+
     args.push(token);
   }
 
