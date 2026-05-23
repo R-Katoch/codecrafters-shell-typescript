@@ -26,7 +26,7 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const hits = allCommands.map((h) => h + " ").filter((c) => c.startsWith(line));
+    const hits = allCommands.map((h) => h + " ").filter((c) => c.startsWith(line)).sort();
     if (hits.length === 0 || hits.length > 1) process.stdout.write("\x07");
     return [hits.length ? hits : [], line];
   },
