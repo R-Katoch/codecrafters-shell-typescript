@@ -27,7 +27,7 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const hits = allCommands.filter((h) => h.startsWith(line)).sort();
+    const hits = allCommands.filter((h) => h.startsWith(line)).sort().map((h) => `${h} `);
 
     if (hits.length === 0) {
       process.stdout.write("\x07");
@@ -48,7 +48,7 @@ const rl = readline.createInterface({
     process.stdout.write("\n");
 
     // restore prompt line
-    process.stdout.write(`$ ${line} `);
+    process.stdout.write(`$ ${line}`);
 
     return [[], line];
   },
