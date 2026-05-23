@@ -22,13 +22,35 @@ registry.register(new CdCommand());
 
 const executor = new CommandExecutor({ registry });
 
+let tabPressedOnce = false;
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const hits = allCommands.map((h) => h + " ").filter((c) => c.startsWith(line)).sort();
-    if (hits.length === 0 || hits.length > 1) process.stdout.write("\x07");
-    return [hits.length ? hits : [], line];
+    const hits = allCommands.filter((h) => h.startsWith(line)).sort();
+
+    if (hits.length === 0) {
+      process.stdout.write("\x07");
+      tabPressedOnce = false;
+      return [[], line];
+    }
+
+    if (!tabPressedOnce) {
+      process.stdout.write("\x07");
+      tabPressedOnce = true;
+      return [[], line];
+    }
+
+    tabPressedOnce = false;
+
+    process.stdout.write("\n");
+    process.stdout.write(hits.join("   "));
+    process.stdout.write("\n");
+
+    // restore prompt line
+    process.stdout.write(`$ ${line}`);
+
+    return [[], line];
   },
   prompt: "$ ",
 });
