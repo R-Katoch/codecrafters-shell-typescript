@@ -48,7 +48,7 @@ const rl = readline.createInterface({
     process.stdout.write("\n");
 
     // restore prompt line
-    process.stdout.write(`$ ${line}`);
+    process.stdout.write(`$ ${line} `);
 
     return [[], line];
   },
