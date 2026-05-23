@@ -22,7 +22,7 @@ registry.register(new CdCommand());
 
 const executor = new CommandExecutor({ registry });
 
-let tabCount = 0;
+let tabPressedCount = 0;
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -31,34 +31,22 @@ const rl = readline.createInterface({
 
     const hits = allCommands.filter((h) => h.startsWith(line)).sort();
 
-    // ❌ no matches → bell
     if (hits.length === 0) {
+      tabPressedCount = 0;
       process.stdout.write("\x07");
-      tabCount = 0;
       return [[], line];
     }
-
-    // 🟡 FIRST TAB → ALWAYS bell (even if matches exist)
-    if (tabCount === 0) {
-      process.stdout.write("\x07");
-      tabCount = 1;
-      return [[], line];
-    }
-
-    // reset after second interaction
-    tabCount = 0;
-
-    // SINGLE match → autocomplete + space
     if (hits.length === 1) {
+      tabPressedCount = 0;
       return [[hits[0] + " "], line];
     }
-
-    // MULTIPLE matches → show list
-    process.stdout.write("\n");
-    process.stdout.write(hits.join("   "));
-    process.stdout.write("\n");
-    process.stdout.write(`$ ${line}`);
-
+    if (tabPressedCount === 0) {
+      tabPressedCount++;
+      process.stdout.write("\x07");
+      return [[], line];
+    }
+    tabPressedCount = 0;
+    process.stdout.write(`\n${hits.join("  ")}\n$ ${line}`);
     return [[], line];
   },
   prompt: "$ ",

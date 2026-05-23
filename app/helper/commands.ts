@@ -31,5 +31,5 @@ function getPathExecutables(): string[] {
 const pathExecutables = getPathExecutables();
 
 export function getAllCommands() {
-  return [...builtins, ...pathExecutables];
+  return Array.from(new Set([...builtins, ...pathExecutables]));
 }
