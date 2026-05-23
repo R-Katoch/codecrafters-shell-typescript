@@ -57,6 +57,7 @@ export function parse(input: string): ParsedCommand {
       continue;
     }
 
+    // stdout overwrite
     if (token === "1>") {
       redirects.push({
         stream: "stdout",
@@ -67,6 +68,7 @@ export function parse(input: string): ParsedCommand {
       continue;
     }
 
+    // stdout append
     if (token === "1>>") {
       redirects.push({
         stream: "stdout",

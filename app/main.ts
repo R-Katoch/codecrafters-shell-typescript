@@ -1,11 +1,13 @@
-import { createInterface } from "readline";
-import { CommandRegistry } from './command-executer';
+import readline from "readline";
 
-import { EchoCommand } from './commands';
-import { ExitCommand } from './commands';
+import { CommandRegistry } from "./command-executer";
+
+import { EchoCommand } from "./commands";
+import { ExitCommand } from "./commands";
 import { TypeCommand } from "./commands";
 import { PwdCommand } from "./commands";
 import { CdCommand } from "./commands";
+
 import { parse } from "./helper/parser/parser";
 import { CommandExecutor } from "./command-executer";
 
@@ -17,23 +19,38 @@ registry.register(new TypeCommand(registry));
 registry.register(new PwdCommand());
 registry.register(new CdCommand());
 
-const executor = new CommandExecutor({
-  registry,
-});
+const executor = new CommandExecutor({ registry });
 
-const rl = createInterface({
+// Commands available for tab completion
+const commands = ["echo", "exit", "type", "pwd", "cd"];
+
+const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
+  completer: (line: string) => {
+    const hits = commands.filter((cmd) => cmd.startsWith(line));
+
+    return [hits.length ? hits : commands, line];
+  },
   prompt: "$ ",
 });
 
-// TODO: Uncomment the code below to pass the first stage
+// EXECUTION
+async function handleInput(input: string) {
+  const parsed = parse(input);
+  await executor.execute(parsed);
+}
+
+// INPUT LOOP
 rl.prompt();
 
 rl.on("line", async (input: string) => {
-  const parsed = parse(input);
-
-  await executor.execute(parsed);
-
+  await handleInput(input);
   rl.prompt();
+});
+
+// OPTIONAL: clean exit behavior
+rl.on("SIGINT", () => {
+  process.stdout.write("\n");
+  process.exit(0);
 });
