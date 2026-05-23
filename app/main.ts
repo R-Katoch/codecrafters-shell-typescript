@@ -22,13 +22,16 @@ registry.register(new CdCommand());
 const executor = new CommandExecutor({ registry });
 
 // Commands available for tab completion
-const commands = ["echo", "exit", "type", "pwd", "cd"];
+const builtins = ["echo", "exit", "type", "pwd", "cd"];
+const pathExecutables = getPathExecutables();
+
+const allCommands = [...new Set([...builtins, ...pathExecutables])];
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const hits = commands.map((h) => h + " ").filter((c) => c.startsWith(line));
+    const hits = allCommands.map((h) => h + " ").filter((c) => c.startsWith(line));
     if (hits.length === 0) process.stdout.write("\x07");
     return [hits.length ? hits : [], line];
   },
@@ -54,3 +57,28 @@ rl.on("SIGINT", () => {
   process.stdout.write("\n");
   process.exit(0);
 });
+
+import fs from "fs";
+import path from "path";
+
+function getPathExecutables(): string[] {
+  const envPath = process.env.PATH || "";
+
+  const dirs = envPath.split(":");
+
+  const executables = new Set<string>();
+
+  for (const dir of dirs) {
+    try {
+      const files = fs.readdirSync(dir);
+
+      for (const file of files) {
+        executables.add(file);
+      }
+    } catch {
+      // ignore invalid dirs
+    }
+  }
+
+  return [...executables];
+}
