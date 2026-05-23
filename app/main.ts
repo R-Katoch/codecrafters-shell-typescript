@@ -22,29 +22,47 @@ registry.register(new CdCommand());
 
 const executor = new CommandExecutor({ registry });
 
-let tabPressedOnce = false;
+let tabCount = 0;
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const allCommands = getAllCommands();
+  const allCommands = getAllCommands();
 
-    const hits = allCommands.filter((h) => h.startsWith(line)).sort();
+  const hits = allCommands
+    .filter((h) => h.startsWith(line))
+    .sort();
 
-    // no match → bell only
-    if (hits.length === 0) {
-      process.stdout.write("\x07");
-      return [[], line];
-    }
+  // ❌ no matches → bell
+  if (hits.length === 0) {
+    process.stdout.write("\x07");
+    tabCount = 0;
+    return [[], line];
+  }
 
-    // SINGLE match → autocomplete + space (GY5 requirement)
-    if (hits.length === 1) {
-      return [[hits[0] + " "], line];
-    }
+  // 🟡 FIRST TAB → ALWAYS bell (even if matches exist)
+  if (tabCount === 0) {
+    process.stdout.write("\x07");
+    tabCount = 1;
+    return [[], line];
+  }
 
-    // MULTIPLE matches → return list only (WH6 requirement)
-    return [hits, line];
-  },
+  // reset after second interaction
+  tabCount = 0;
+
+  // SINGLE match → autocomplete + space
+  if (hits.length === 1) {
+    return [[hits[0] + " "], line];
+  }
+
+  // MULTIPLE matches → show list
+  process.stdout.write("\n");
+  process.stdout.write(hits.join("   "));
+  process.stdout.write("\n");
+  process.stdout.write(`$ ${line}`);
+
+  return [[], line];
+},
   prompt: "$ ",
 });
 
