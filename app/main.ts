@@ -10,7 +10,7 @@ import { CdCommand } from "./commands";
 
 import { parse } from "./helper/parser/parser";
 import { CommandExecutor } from "./command-executer";
-import { allCommands } from "./helper";
+import { getAllCommands } from "./helper";
 
 const registry = new CommandRegistry();
 
@@ -27,6 +27,7 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
+    const allCommands = getAllCommands();
     const hits = allCommands.filter((h) => h.startsWith(line)).sort().map((h) => `${h} `);
 
     if (hits.length === 0) {

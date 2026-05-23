@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 
 function getPathExecutables(): string[] {
   const envPath = process.env.PATH || "";
@@ -24,6 +23,7 @@ function getPathExecutables(): string[] {
 }
 
 const builtins = ["echo", "exit", "type", "pwd", "cd"];
-const pathExecutables = getPathExecutables();
 
-export const allCommands = [...new Set([...builtins, ...pathExecutables])];
+export function getAllCommands() {
+  return [...builtins, ...getPathExecutables()];
+}
