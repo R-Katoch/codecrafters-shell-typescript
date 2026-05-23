@@ -28,7 +28,8 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const hits = commands.map((h) => h + " ").filter((c) => c.startsWith(line)) || '\x07';
+    const hits = commands.map((h) => h + " ").filter((c) => c.startsWith(line));
+    if (hits.length === 0) process.stdout.write("\x07");
     return [hits.length ? hits : [], line];
   },
   prompt: "$ ",
