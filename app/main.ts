@@ -10,6 +10,7 @@ import { CdCommand } from "./commands";
 
 import { parse } from "./helper/parser/parser";
 import { CommandExecutor } from "./command-executer";
+import { allCommands } from "./helper";
 
 const registry = new CommandRegistry();
 
@@ -20,12 +21,6 @@ registry.register(new PwdCommand());
 registry.register(new CdCommand());
 
 const executor = new CommandExecutor({ registry });
-
-// Commands available for tab completion
-const builtins = ["echo", "exit", "type", "pwd", "cd"];
-const pathExecutables = getPathExecutables();
-
-const allCommands = [...new Set([...builtins, ...pathExecutables])];
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -57,28 +52,3 @@ rl.on("SIGINT", () => {
   process.stdout.write("\n");
   process.exit(0);
 });
-
-import fs from "fs";
-import path from "path";
-
-function getPathExecutables(): string[] {
-  const envPath = process.env.PATH || "";
-
-  const dirs = envPath.split(":");
-
-  const executables = new Set<string>();
-
-  for (const dir of dirs) {
-    try {
-      const files = fs.readdirSync(dir);
-
-      for (const file of files) {
-        executables.add(file);
-      }
-    } catch {
-      // ignore invalid dirs
-    }
-  }
-
-  return [...executables];
-}
