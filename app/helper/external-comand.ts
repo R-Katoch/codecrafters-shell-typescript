@@ -10,11 +10,11 @@ export function runExternalCommand(
       argv0: commandName,
       stdio: "inherit",
     });
-    child.on("error", (err) => {
+    child.on("error", (err: { message: any; }) => {
       console.error(err.message);
       reject(err);
     });
-    child.on("close", (code) => {
+    child.on("close", (code: any) => {
       resolve();
     });
   });

@@ -8,13 +8,13 @@ export class TypeCommand implements Command {
 
   constructor(private registry: CommandRegistry) {}
 
-  execute({ args }: CommandContext) {
+  execute({ args, stdout }: CommandContext) {
     const cmd = args[0] as CommandName;
     if (!cmd) return;
 
     // 1. check builtin
     if (this.registry.get(cmd)) {
-      console.log(`${cmd} is a shell builtin`);
+      stdout.write(`${cmd} is a shell builtin\n`);
       return;
     }
 
@@ -22,9 +22,9 @@ export class TypeCommand implements Command {
     const resolved = resolveFromPath(cmd);
 
     if (resolved) {
-      console.log(`${cmd} is ${resolved}`);
+      stdout.write(`${cmd} is ${resolved}\n`);
     } else {
-      console.log(`${cmd}: not found`);
+      stdout.write(`${cmd}: not found\n`);
     }
   }
 }

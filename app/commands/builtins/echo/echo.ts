@@ -1,9 +1,9 @@
-import type { Command, CommandContext } from '../../../types';
+import type { Command, CommandContext } from "../../../types";
 
 export class EchoCommand implements Command {
   readonly name = "echo";
 
-  execute({ args }: CommandContext) {
-    console.log(args.join(" "));
+  execute({ args, stdout }: CommandContext) {
+    stdout.write(args.join(" ") + "\n");
   }
 }

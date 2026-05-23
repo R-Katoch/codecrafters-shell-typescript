@@ -3,11 +3,11 @@ import type { Command, CommandContext } from '../../../types';
 export class PwdCommand implements Command {
   readonly name = "pwd";
 
-  execute({ args }: CommandContext) {
+  execute({ args, stdout }: CommandContext) {
     if (args.length > 0) {
-      console.error("pwd: too many arguments");
+      stdout.write("pwd: too many arguments\n");
       return;
     }
-    console.log(process.cwd());
+    stdout.write(process.cwd() + "\n");
   }
 }
