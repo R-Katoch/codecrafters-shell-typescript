@@ -27,32 +27,26 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const allCommands = getAllCommands();
-    const hits = allCommands.filter((h) => h.startsWith(line)).sort().map((h) => `${h} `);
+  const allCommands = getAllCommands();
 
-    if (hits.length === 0) {
-      process.stdout.write("\x07");
-      tabPressedOnce = false;
-      return [[], line];
-    }
+  const hits = allCommands
+    .filter((h) => h.startsWith(line))
+    .sort();
 
-    if (!tabPressedOnce) {
-      process.stdout.write("\x07");
-      tabPressedOnce = true;
-      return [[], line];
-    }
-
-    tabPressedOnce = false;
-
-    process.stdout.write("\n");
-    process.stdout.write(hits.join("   "));
-    process.stdout.write("\n");
-
-    // restore prompt line
-    process.stdout.write(`$ ${line}`);
-
+  // no match → bell only
+  if (hits.length === 0) {
+    process.stdout.write("\x07");
     return [[], line];
-  },
+  }
+
+  // SINGLE match → autocomplete + space (GY5 requirement)
+  if (hits.length === 1) {
+    return [[hits[0] + " "], line];
+  }
+
+  // MULTIPLE matches → return list only (WH6 requirement)
+  return [hits, line];
+},,
   prompt: "$ ",
 });
 
