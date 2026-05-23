@@ -4,7 +4,7 @@ import type { ExecutorContext } from "../types";
 
 import { resolveFromPath } from "../helper/path-resolver";
 import { runExternalCommand } from "../helper/external-comand";
-import { createStdoutStream } from "../helper/redirect";
+import { createStderrStream, createStdoutStream } from "../helper/redirect";
 import type { BuiltinCommandName } from "../enums";
 
 export class CommandExecutor {
@@ -20,6 +20,7 @@ export class CommandExecutor {
     const builtin = this.context.registry.get(command as BuiltinCommandName);
 
     const stdout = createStdoutStream(redirects);
+    const stderr = createStderrStream(redirects);
     if (builtin) {
       builtin.execute({
           args,
@@ -33,7 +34,7 @@ export class CommandExecutor {
     const executable = resolveFromPath(command);
 
     if (executable) {
-      await runExternalCommand(executable, args, command, stdout);
+      await runExternalCommand(executable, args, command, stdout, stderr);
 
       return;
     }

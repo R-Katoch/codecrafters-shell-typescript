@@ -6,16 +6,16 @@ export function runExternalCommand(
   args: string[],
   commandName: string,
   stdout: Writable,
+  stderr: Writable,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(executablePath, args, {
       argv0: commandName,
-      stdio: ["inherit", "pipe", "inherit"],
+      stdio: ["inherit", "pipe", "pipe"],
     });
 
-    if (child.stdout) {
-      child.stdout.pipe(stdout);
-    }
+    child.stdout?.pipe(stdout);
+    child.stderr?.pipe(stderr);
 
     child.on("error", reject);
     child.on("close", () => resolve());

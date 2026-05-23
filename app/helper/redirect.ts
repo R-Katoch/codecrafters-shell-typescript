@@ -17,3 +17,19 @@ export function createStdoutStream(
     flags: redirect.mode === "append" ? "a" : "w",
   });
 }
+
+export function createStderrStream(
+  redirects: Redirect[]
+) {
+  const redirect = redirects.find(
+    (r) => r.stream === "stderr"
+  );
+
+  if (!redirect) {
+    return process.stderr;
+  }
+
+  return fs.createWriteStream(redirect.target, {
+    flags: redirect.mode === "append" ? "a" : "w",
+  })
+}
