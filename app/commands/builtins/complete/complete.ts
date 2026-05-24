@@ -75,9 +75,13 @@ export class CompleteCommand implements Command {
     }
 
     try {
-      const result = Bun.spawnSync([spec.command]);
+      const result = Bun.spawnSync({
+        cmd: [spec.command],
+        stdout: "pipe",
+        stderr: "pipe",
+      });
 
-      const output = result.stdout.toString().trim();
+      const output = new TextDecoder().decode(result.stdout).trim();
 
       if (!output) {
         return [];
