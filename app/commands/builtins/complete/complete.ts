@@ -67,7 +67,13 @@ export class CompleteCommand implements Command {
     return CompleteCommand.completions.get(command);
   }
 
-  static runCompletion(command: string): string[] {
+  static runCompletion(tokens: string[]): string[] {
+    const command = tokens[0];
+
+    const currentToken = tokens[tokens.length - 1];
+
+    const previousToken = tokens.length >= 2 ? tokens[tokens.length - 2] : "";
+
     const spec = CompleteCommand.completions.get(command);
 
     if (!spec) {
@@ -76,7 +82,7 @@ export class CompleteCommand implements Command {
 
     try {
       const result = Bun.spawnSync({
-        cmd: [spec.command],
+        cmd: [spec.command, command, currentToken, previousToken],
         stdout: "pipe",
         stderr: "pipe",
       });
