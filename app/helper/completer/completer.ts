@@ -20,7 +20,9 @@ export class CompletionEngine {
     const completions = CompleteCommand.runCompletion(tokens);
 
     if (completions.length === 1) {
-      return [[line + completions[0] + " "], line];
+      const updatedTokens = [...tokens.slice(0, -1), completions[0]];
+
+      return [[updatedTokens.join(" ") + " "], line];
     }
 
     const matches = isCommand
