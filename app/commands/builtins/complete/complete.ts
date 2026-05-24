@@ -14,7 +14,6 @@ export class CompleteCommand implements Command {
   execute(context: CommandContext): void {
     const { args, stdout } = context;
 
-    // complete -p
     if (args[0] === "-p") {
       const target = args[1];
 
@@ -36,7 +35,7 @@ export class CompleteCommand implements Command {
         return;
       }
 
-      stdout.write(`complete -C ${spec.command} ${target}\n`);
+      stdout.write(`complete -C '${spec.command}' ${target}\n`);
 
       return;
     }
