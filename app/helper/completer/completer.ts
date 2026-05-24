@@ -40,7 +40,7 @@ export class CompletionEngine {
 
       const match = matches[0];
 
-      const completed = isCommand ? match + " " : match;
+      const completed =  match + " ";
 
       return [[rebuildLine(completed)], line];
     }
