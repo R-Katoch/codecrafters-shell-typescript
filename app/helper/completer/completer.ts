@@ -41,7 +41,7 @@ export class CompletionEngine {
 
         const updatedTokens = [...tokens.slice(0, -1), completions[0]];
 
-        return [[updatedTokens.join(" ") + " "], line];
+        return [[updatedTokens.join(" ")], line];
       }
 
       // multiple completions
