@@ -66,4 +66,29 @@ export class CompleteCommand implements Command {
   static getCompletion(command: string): CompletionSpec | undefined {
     return CompleteCommand.completions.get(command);
   }
+
+  static runCompletion(command: string): string[] {
+    const spec = CompleteCommand.completions.get(command);
+
+    if (!spec) {
+      return [];
+    }
+
+    try {
+      const result = Bun.spawnSync([spec.command]);
+
+      const output = result.stdout.toString().trim();
+
+      if (!output) {
+        return [];
+      }
+
+      return output
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+    } catch {
+      return [];
+    }
+  }
 }

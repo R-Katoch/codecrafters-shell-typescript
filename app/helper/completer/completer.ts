@@ -3,6 +3,7 @@ import { renderSuggestions, ringBell } from "./renderer";
 
 import { getCommandMatches } from "./providers";
 import { getFileMatches } from "./providers";
+import { CompleteCommand } from "../../commands";
 
 export class CompletionEngine {
   private tabPressedCount = 0;
@@ -13,6 +14,14 @@ export class CompletionEngine {
     const currentToken = tokens[tokens.length - 1];
 
     const isCommand = tokens.length === 1 && !line.endsWith(" ");
+
+    if (line.endsWith(" ") && isCommand) {
+      const completions = CompleteCommand.runCompletion(currentToken);
+
+      if (completions.length === 1) {
+        return [[line + completions[0] + " "], line];
+      }
+    }
 
     const matches = isCommand
       ? getCommandMatches(currentToken)
@@ -40,7 +49,7 @@ export class CompletionEngine {
 
       const match = matches[0];
 
-      const completed =  match;
+      const completed = match;
 
       return [[rebuildLine(completed)], line];
     }
