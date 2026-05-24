@@ -1,8 +1,8 @@
 import { getLongestCommonPrefix } from "./lcp";
 import { renderSuggestions, ringBell } from "./renderer";
 
-import { getCommandMatches } from "./providers";
-import { getFileMatches } from "./providers";
+import { getCommandMatches, getFileMatches } from "./providers";
+
 import { CompleteCommand } from "../../commands";
 
 export class CompletionEngine {
@@ -17,16 +17,61 @@ export class CompletionEngine {
 
     const isCommand = tokens.length === 1 && !line.endsWith(" ");
 
-    const COMP_LINE = tokens.join(" ");
-    const COMP_POINT = COMP_LINE.length;
-    const completions = CompleteCommand.runCompletion(tokens, COMP_LINE, COMP_POINT);
+    // helper to rebuild line
+    const rebuildLine = (completed: string) => {
+      const updatedTokens = [...tokens.slice(0, -1), completed];
 
-    if (completions.length === 1) {
-      const updatedTokens = [...tokens.slice(0, -1), completions[0]];
+      return updatedTokens.join(" ");
+    };
 
-      return [[updatedTokens.join(" ") + " "], line];
+    // programmable completion
+    const COMP_LINE = line;
+    const COMP_POINT = line.length;
+
+    const completions = CompleteCommand.runCompletion(
+      tokens,
+      COMP_LINE,
+      COMP_POINT,
+    );
+
+    if (completions.length > 0) {
+      // single completion
+      if (completions.length === 1) {
+        this.tabPressedCount = 0;
+
+        const updatedTokens = [...tokens.slice(0, -1), completions[0]];
+
+        return [[updatedTokens.join(" ") + " "], line];
+      }
+
+      // multiple completions
+      const lcp = getLongestCommonPrefix(completions);
+
+      // expand common prefix
+      if (lcp.length > currentToken.length) {
+        this.tabPressedCount = 0;
+
+        return [[rebuildLine(lcp)], line];
+      }
+
+      // first TAB
+      if (this.tabPressedCount === 0) {
+        this.tabPressedCount++;
+
+        ringBell();
+
+        return [[], line];
+      }
+
+      // second TAB
+      this.tabPressedCount = 0;
+
+      renderSuggestions(completions, line);
+
+      return [[], line];
     }
 
+    // normal completion
     const matches = isCommand
       ? getCommandMatches(currentToken)
       : getFileMatches(currentToken);
@@ -40,22 +85,13 @@ export class CompletionEngine {
       return [[], line];
     }
 
-    // helper to rebuild line
-    const rebuildLine = (completed: string) => {
-      const updatedTokens = [...tokens.slice(0, -1), completed];
-
-      return updatedTokens.join(" ");
-    };
-
     // single match
     if (matches.length === 1) {
       this.tabPressedCount = 0;
 
       const match = matches[0];
 
-      const completed = match;
-
-      return [[rebuildLine(completed)], line];
+      return [[rebuildLine(match + " ")], line];
     }
 
     // multiple matches
@@ -77,7 +113,7 @@ export class CompletionEngine {
       return [[], line];
     }
 
-    // second TAB → show suggestions
+    // second TAB
     this.tabPressedCount = 0;
 
     renderSuggestions(matches, line);
