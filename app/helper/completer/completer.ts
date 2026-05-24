@@ -11,12 +11,14 @@ export class CompletionEngine {
   complete(line: string): [string[], string] {
     const tokens = line.split(" ");
 
+    const command = tokens[0];
+
     const currentToken = tokens[tokens.length - 1];
 
     const isCommand = tokens.length === 1 && !line.endsWith(" ");
 
-    if (line.endsWith(" ") && isCommand) {
-      const completions = CompleteCommand.runCompletion(currentToken);
+    if (line.endsWith(" ")) {
+      const completions = CompleteCommand.runCompletion(command);
 
       if (completions.length === 1) {
         return [[line + completions[0] + " "], line];
