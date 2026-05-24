@@ -96,7 +96,7 @@ export class CompleteCommand implements Command {
         },
       });
 
-      const output = new TextDecoder().decode(result.stdout).trim();
+      const output = new TextDecoder().decode(result.stdout).trim() + COMP_LINE;
 
       if (!output) {
         return [];
