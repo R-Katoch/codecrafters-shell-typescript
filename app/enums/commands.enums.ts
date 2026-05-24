@@ -1,4 +1,4 @@
-export type BuiltinCommandName = "echo" | "exit" | "type" | "pwd" | "cd" | "complete";
+export type BuiltinCommandName = "echo" | "exit" | "type" | "pwd" | "cd" | "complete" | "jobs";
 
 export type CommandName = BuiltinCommandName;
 
@@ -8,4 +8,6 @@ export enum Command {
     type = "type",
     pwd = "pwd",
     cd = "cd",
+    complete = "complete",
+    jobs = "jobs"
 }
