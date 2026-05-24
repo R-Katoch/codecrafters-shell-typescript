@@ -67,7 +67,7 @@ export class CompleteCommand implements Command {
     return CompleteCommand.completions.get(command);
   }
 
-  static runCompletion(tokens: string[]): string[] {
+  static runCompletion(tokens: string[], COMP_LINE: string, COMP_POINT: number): string[] {
     const command = tokens[0];
 
     const currentToken = tokens[tokens.length - 1];
@@ -82,7 +82,7 @@ export class CompleteCommand implements Command {
 
     try {
       const result = Bun.spawnSync({
-        cmd: [spec.command, command, currentToken, previousToken],
+        cmd: [spec.command, command, currentToken, previousToken, COMP_LINE, COMP_POINT],
         stdout: "pipe",
         stderr: "pipe",
       });

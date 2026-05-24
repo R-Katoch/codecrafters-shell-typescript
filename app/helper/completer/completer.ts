@@ -17,7 +17,9 @@ export class CompletionEngine {
 
     const isCommand = tokens.length === 1 && !line.endsWith(" ");
 
-    const completions = CompleteCommand.runCompletion(tokens);
+    const COMP_POINT = line.length - currentToken.length;
+    const COMP_LINE = line.slice(0, COMP_POINT);
+    const completions = CompleteCommand.runCompletion(tokens, COMP_LINE, COMP_POINT);
 
     if (completions.length === 1) {
       const updatedTokens = [...tokens.slice(0, -1), completions[0]];
