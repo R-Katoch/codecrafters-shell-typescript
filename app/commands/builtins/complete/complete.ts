@@ -82,7 +82,7 @@ export class CompleteCommand implements Command {
 
     try {
       const result = Bun.spawnSync({
-        cmd: [spec.command, command, currentToken, previousToken, COMP_LINE, COMP_POINT],
+        cmd: [spec.command, command, currentToken, previousToken, COMP_LINE, String(COMP_POINT)],
         stdout: "pipe",
         stderr: "pipe",
       });
