@@ -60,6 +60,20 @@ export class CompleteCommand implements Command {
       return;
     }
 
+    if (args[0] === "-r") {
+      const target = args[1];
+
+      if (!target) {
+        stdout.write(`${this.name}: usage: complete -r <target>\n`);
+
+        return;
+      }
+
+      CompleteCommand.completions.delete(target);
+
+      return;
+    }
+
     stdout.write(`${this.name}: unsupported option\n`);
   }
 
