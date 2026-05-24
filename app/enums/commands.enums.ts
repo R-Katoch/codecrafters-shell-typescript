@@ -1,4 +1,4 @@
-export type BuiltinCommandName = "echo" | "exit" | "type" | "pwd" | "cd";
+export type BuiltinCommandName = "echo" | "exit" | "type" | "pwd" | "cd" | "complete";
 
 export type CommandName = BuiltinCommandName;
 
