@@ -1,22 +1,22 @@
-import { getAllCommands } from "../commands";
 import { getLongestCommonPrefix } from "./lcp";
-import { getMatches } from "./matcher";
-import {
-  renderSuggestions,
-  ringBell,
-} from "./renderer";
+import { renderSuggestions, ringBell } from "./renderer";
+
+import { getCommandMatches } from "./providers";
+import { getFileMatches } from "./providers";
 
 export class CompletionEngine {
   private tabPressedCount = 0;
 
-  complete(
-    line: string,
-  ): [string[], string] {
-    const commands = getAllCommands();
-    const matches = getMatches(
-      line,
-      commands,
-    );
+  complete(line: string): [string[], string] {
+    const tokens = line.split(" ");
+
+    const currentToken = tokens[tokens.length - 1];
+
+    const isCommand = tokens.length === 1 && !line.endsWith(" ");
+
+    const matches = isCommand
+      ? getCommandMatches(currentToken)
+      : getFileMatches(currentToken);
 
     // no matches
     if (matches.length === 0) {
@@ -27,25 +27,32 @@ export class CompletionEngine {
       return [[], line];
     }
 
+    // helper to rebuild line
+    const rebuildLine = (completed: string) => {
+      const updatedTokens = [...tokens.slice(0, -1), completed];
+
+      return updatedTokens.join(" ");
+    };
+
     // single match
     if (matches.length === 1) {
       this.tabPressedCount = 0;
 
-      return [
-        [matches[0] + " "],
-        line,
-      ];
+      const match = matches[0];
+
+      const completed = isCommand ? match + " " : match;
+
+      return [[rebuildLine(completed)], line];
     }
 
     // multiple matches
-    const lcp =
-      getLongestCommonPrefix(matches);
+    const lcp = getLongestCommonPrefix(matches);
 
-    // expand to LCP
-    if (lcp.length > line.length) {
+    // expand to longest common prefix
+    if (lcp.length > currentToken.length) {
       this.tabPressedCount = 0;
 
-      return [[lcp], line];
+      return [[rebuildLine(lcp)], line];
     }
 
     // first TAB after max expansion
@@ -57,7 +64,7 @@ export class CompletionEngine {
       return [[], line];
     }
 
-    // second TAB
+    // second TAB → show suggestions
     this.tabPressedCount = 0;
 
     renderSuggestions(matches, line);
