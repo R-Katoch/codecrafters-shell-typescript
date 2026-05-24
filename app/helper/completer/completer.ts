@@ -91,7 +91,7 @@ export class CompletionEngine {
 
       const match = matches[0];
 
-      const completed = match.endsWith("/") ? match : match + " ";
+      const completed = match.endsWith(" ") ? match : match + " ";
 
       return [[rebuildLine(completed)], line];
     }
