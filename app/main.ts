@@ -2,7 +2,7 @@ import readline from "readline";
 
 import { CommandRegistry } from "./command-executer";
 
-import { EchoCommand } from "./commands";
+import { CompleteCommand, EchoCommand } from "./commands";
 import { ExitCommand } from "./commands";
 import { TypeCommand } from "./commands";
 import { PwdCommand } from "./commands";
@@ -20,6 +20,7 @@ registry.register(new ExitCommand());
 registry.register(new TypeCommand(registry));
 registry.register(new PwdCommand());
 registry.register(new CdCommand());
+registry.register(new CompleteCommand());
 
 const executor = new CommandExecutor({ registry });
 
