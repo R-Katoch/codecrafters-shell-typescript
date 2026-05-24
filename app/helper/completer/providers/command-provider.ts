@@ -7,5 +7,6 @@ export function getCommandMatches(
     .filter((cmd) =>
       cmd.startsWith(input),
     )
-    .sort();
+    .sort()
+    .map((cmd) => cmd + " ");
 }

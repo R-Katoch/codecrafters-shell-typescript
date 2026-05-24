@@ -17,11 +17,14 @@ export function getFileMatches(input: string): string[] {
     return entries
       .filter((entry) => entry.startsWith(partial))
       .map((entry) => {
-        if (dir === "." || dir === "") {
-          return entry;
-        }
+        const fullPath = path.join(targetDir, entry);
 
-        return path.join(dir, entry);
+        const isDirectory = fs.statSync(fullPath).isDirectory();
+
+        const completed =
+          dir === "." || dir === "" ? entry : path.join(dir, entry);
+
+        return isDirectory ? completed + "/" : completed + " ";
       })
       .sort();
   } catch {
