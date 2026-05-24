@@ -27,7 +27,6 @@ function getPathExecutables(): string[] {
   return result;
 }
 
-// ✅ IMPORTANT: compute ONCE
 const pathExecutables = getPathExecutables();
 
 export function getAllCommands() {

@@ -10,9 +10,10 @@ import { CdCommand } from "./commands";
 
 import { parse } from "./helper/parser/parser";
 import { CommandExecutor } from "./command-executer";
-import { getAllCommands } from "./helper";
+import { CompletionEngine } from "./helper/completer/completer";
 
 const registry = new CommandRegistry();
+const completionEngine = new CompletionEngine();
 
 registry.register(new EchoCommand());
 registry.register(new ExitCommand());
@@ -22,32 +23,11 @@ registry.register(new CdCommand());
 
 const executor = new CommandExecutor({ registry });
 
-let tabPressedCount = 0;
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   completer: (line: string) => {
-    const allCommands = getAllCommands();
-
-    const hits = allCommands.filter((h) => h.startsWith(line)).sort();
-
-    if (hits.length === 0) {
-      tabPressedCount = 0;
-      process.stdout.write("\x07");
-      return [[], line];
-    }
-    if (hits.length === 1) {
-      tabPressedCount = 0;
-      return [[hits[0] + " "], line];
-    }
-    if (tabPressedCount === 0) {
-      tabPressedCount++;
-      process.stdout.write("\x07");
-      return [[], line];
-    }
-    tabPressedCount = 0;
-    process.stdout.write(`\n${hits.join("  ")}\n$ ${line}`);
-    return [[], line];
+    return completionEngine.complete(line);
   },
   prompt: "$ ",
 });
