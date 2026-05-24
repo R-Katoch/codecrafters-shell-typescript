@@ -41,7 +41,7 @@ export class CompletionEngine {
 
         const updatedTokens = [...tokens.slice(0, -1), completions[0]];
 
-        return [[updatedTokens.join(" ")], line];
+        return [[updatedTokens.join(" ") + " "], line];
       }
 
       // multiple completions
@@ -91,7 +91,9 @@ export class CompletionEngine {
 
       const match = matches[0];
 
-      return [[rebuildLine(match + " ")], line];
+      const completed = match.endsWith("/") ? match : match + " ";
+
+      return [[rebuildLine(completed)], line];
     }
 
     // multiple matches
