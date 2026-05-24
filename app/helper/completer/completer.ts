@@ -17,12 +17,10 @@ export class CompletionEngine {
 
     const isCommand = tokens.length === 1 && !line.endsWith(" ");
 
-    if (line.endsWith(" ")) {
-      const completions = CompleteCommand.runCompletion(tokens);
+    const completions = CompleteCommand.runCompletion(tokens);
 
-      if (completions.length === 1) {
-        return [[line + completions[0] + " "], line];
-      }
+    if (completions.length === 1) {
+      return [[line + completions[0] + " "], line];
     }
 
     const matches = isCommand
