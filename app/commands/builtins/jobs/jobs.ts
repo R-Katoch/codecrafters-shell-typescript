@@ -11,17 +11,38 @@ export class JobsCommand implements Command {
     if (jobs.length === 0) return;
 
     const mostRecentJob = jobs[jobs.length - 1];
-    const previousJob = jobs.length > 1 ? jobs[jobs.length - 2] : undefined;
+    const previousJob = this.getPreviousJob(jobs, mostRecentJob);
 
     for (const job of jobs) {
-      const marker = job.id === mostRecentJob.id
-        ? "+"
-        : job.id === previousJob?.id
-        ? "-"
-        : " ";
+      const marker =
+        job.id === mostRecentJob.id
+          ? "+"
+          : job.id === previousJob?.id
+            ? "-"
+            : " ";
       const status = job.status.padEnd(24, " ");
       const trailing = job.status === "Running" ? " &" : "";
-      context.stdout.write(`[${job.id}]${marker}  ${status}${job.command}${trailing}\n`);
+      context.stdout.write(
+        `[${job.id}]${marker}  ${status}${job.command}${trailing}\n`,
+      );
     }
+  }
+
+  private getPreviousJob(
+    jobs: Array<{ id: number; status: string }>,
+    mostRecentJob: { id: number; status: string },
+  ) {
+    if (jobs.length < 2) return undefined;
+
+    if (mostRecentJob.status === "Running") {
+      return jobs[jobs.length - 2];
+    }
+
+    return (
+      [...jobs]
+        .slice(0, jobs.length - 1)
+        .reverse()
+        .find((job) => job.status === "Running") ?? jobs[jobs.length - 2]
+    );
   }
 }
