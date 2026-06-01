@@ -1,81 +1,26 @@
 import { tokenize } from "./tokenizer";
-import type { ParsedCommand, Redirect } from '../../types';
+import type { ParsedCommand, Redirect } from "../../types";
+
+const REDIRECTS: Record<string, Omit<Redirect, "target">> = {
+  ">":   { stream: "stdout", mode: "write"  },
+  ">>":  { stream: "stdout", mode: "append" },
+  "1>":  { stream: "stdout", mode: "write"  },
+  "1>>": { stream: "stdout", mode: "append" },
+  "2>":  { stream: "stderr", mode: "write"  },
+  "2>>": { stream: "stderr", mode: "append" },
+};
 
 export function parse(input: string): ParsedCommand {
   const tokens = tokenize(input);
-
   const redirects: Redirect[] = [];
-
-  const command = tokens[0];
-
   const args: string[] = [];
 
   for (let i = 1; i < tokens.length; i++) {
     const token = tokens[i];
 
-    // stdout overwrite
-    if (token === ">") {
-      redirects.push({
-        stream: "stdout",
-        mode: "write",
-        target: tokens[++i],
-      });
-
-      continue;
-    }
-
-    // stdout append
-    if (token === ">>") {
-      redirects.push({
-        stream: "stdout",
-        mode: "append",
-        target: tokens[++i],
-      });
-
-      continue;
-    }
-
-    // stderr overwrite
-    if (token === "2>") {
-      redirects.push({
-        stream: "stderr",
-        mode: "write",
-        target: tokens[++i],
-      });
-
-      continue;
-    }
-
-    // stderr append
-    if (token === "2>>") {
-      redirects.push({
-        stream: "stderr",
-        mode: "append",
-        target: tokens[++i],
-      });
-
-      continue;
-    }
-
-    // stdout overwrite
-    if (token === "1>") {
-      redirects.push({
-        stream: "stdout",
-        mode: "write",
-        target: tokens[++i],
-      });
-
-      continue;
-    }
-
-    // stdout append
-    if (token === "1>>") {
-      redirects.push({
-        stream: "stdout",
-        mode: "append",
-        target: tokens[++i],
-      });
-
+    const redirect = REDIRECTS[token];
+    if (redirect !== undefined) {
+      redirects.push({ ...redirect, target: tokens[++i] });
       continue;
     }
 
@@ -83,7 +28,7 @@ export function parse(input: string): ParsedCommand {
   }
 
   return {
-    command,
+    command: tokens[0],
     args,
     redirects,
   };
