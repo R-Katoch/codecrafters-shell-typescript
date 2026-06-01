@@ -1,6 +1,6 @@
 import readline from "readline";
 
-import { CommandRegistry } from "./command-executer";
+import { CommandRegistry, JobManager, CommandExecutor } from "./command-executer";
 
 import { CompleteCommand, EchoCommand, JobsCommand } from "./commands";
 import { ExitCommand } from "./commands";
@@ -9,10 +9,10 @@ import { PwdCommand } from "./commands";
 import { CdCommand } from "./commands";
 
 import { parse } from "./helper/parser/parser";
-import { CommandExecutor } from "./command-executer";
 import { CompletionEngine } from "./helper/completer/completer";
 
 const registry = new CommandRegistry();
+const jobManager = new JobManager();
 const completionEngine = new CompletionEngine();
 
 registry.register(new EchoCommand());
@@ -21,9 +21,9 @@ registry.register(new TypeCommand(registry));
 registry.register(new PwdCommand());
 registry.register(new CdCommand());
 registry.register(new CompleteCommand());
-registry.register(new JobsCommand());
+registry.register(new JobsCommand(jobManager));
 
-const executor = new CommandExecutor({ registry });
+const executor = new CommandExecutor({ registry }, jobManager);
 
 const rl = readline.createInterface({
   input: process.stdin,
