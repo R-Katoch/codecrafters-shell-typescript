@@ -25,51 +25,57 @@ registry.register(new JobsCommand(jobManager));
 
 const executor = new CommandExecutor({ registry }, jobManager);
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  completer: (line: string) => {
-    return completionEngine.complete(line);
-  },
-  prompt: "$ ",
-});
+class Shell {
+  private readonly rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    completer: (line: string) => completionEngine.complete(line),
+    prompt: "$ ",
+  });
 
-// EXECUTION
-async function handleInput(input: string) {
-  const parsed = parse(input);
-  await executor.execute(parsed);
-}
+  async start() {
+    this.reapJobsBeforePrompt();
+    this.rl.prompt();
 
-function reapJobsBeforePrompt() {
-  const doneJobs = jobManager.reapDoneJobs();
-  if (doneJobs.length === 0) return;
+    this.rl.on("line", async (input: string) => {
+      await this.handleInput(input);
+      this.reapJobsBeforePrompt();
+      this.rl.prompt();
+    });
 
-  const mostRecentJob = doneJobs[doneJobs.length - 1];
-  const previousJob = doneJobs.length > 1 ? doneJobs[doneJobs.length - 2] : undefined;
+    this.rl.on("SIGINT", () => {
+      process.stdout.write("\n");
+      process.exit(0);
+    });
+  }
 
-  for (const job of doneJobs) {
+  private async handleInput(input: string) {
+    const parsed = parse(input);
+    await executor.execute(parsed);
+  }
+
+  private reapJobsBeforePrompt() {
+    const doneJobs = jobManager.reapDoneJobs();
+    if (doneJobs.length === 0) return;
+
+    const mostRecentJob = doneJobs[doneJobs.length - 1];
+    const previousJob = doneJobs.length > 1 ? doneJobs[doneJobs.length - 2] : undefined;
+
+    for (const job of doneJobs) {
+      process.stdout.write(this.formatJobLine(job, mostRecentJob, previousJob));
+    }
+  }
+
+  private formatJobLine(job: { id: number; command: string; status: string }, mostRecentJob: { id: number }, previousJob?: { id: number }) {
     const marker = job.id === mostRecentJob.id
       ? "+"
       : job.id === previousJob?.id
       ? "-"
       : " ";
+
     const status = job.status.padEnd(24, " ");
-    process.stdout.write(`[${job.id}]${marker}  ${status}${job.command}\n`);
+    return `[${job.id}]${marker}  ${status}${job.command}\n`;
   }
 }
 
-// INPUT LOOP
-reapJobsBeforePrompt();
-rl.prompt();
-
-rl.on("line", async (input: string) => {
-  await handleInput(input);
-  reapJobsBeforePrompt();
-  rl.prompt();
-});
-
-// OPTIONAL: clean exit behavior
-rl.on("SIGINT", () => {
-  process.stdout.write("\n");
-  process.exit(0);
-});
+new Shell().start();

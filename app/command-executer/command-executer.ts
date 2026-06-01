@@ -6,21 +6,25 @@ import { resolveFromPath } from "../helper/path-resolver";
 import { runExternalCommand, spawnExternalCommand } from "../helper/external-comand";
 import { createStderrStream, createStdoutStream } from "../helper/redirect";
 
-type BackgroundJob = {
+export type BackgroundJobStatus = "Running" | "Done";
+
+export type BackgroundJob = {
   id: number;
   pid: number;
   command: string;
-  status: "Running" | "Done";
+  status: BackgroundJobStatus;
+};
+
+type JobRecord = BackgroundJob & {
   child: ChildProcessWithoutNullStreams;
 };
 
 export class JobManager {
-  private nextJobId = 1;
-  private jobs = new Map<number, BackgroundJob>();
+  private readonly jobs = new Map<number, JobRecord>();
 
   add(command: string, pid: number, child: ChildProcessWithoutNullStreams) {
-    const id = this.nextJobId++;
-    const job: BackgroundJob = {
+    const id = this.getNextJobId();
+    const record: JobRecord = {
       id,
       pid,
       command,
@@ -28,8 +32,8 @@ export class JobManager {
       child,
     };
 
-    this.jobs.set(id, job);
-    return job;
+    this.jobs.set(id, record);
+    return this.toJobSummary(record);
   }
 
   markDone(jobId: number) {
@@ -38,19 +42,34 @@ export class JobManager {
     job.status = "Done";
   }
 
-  remove(jobId: number) {
-    this.jobs.delete(jobId);
-  }
+  reapDoneJobs() {
+    this.updateJobStatuses();
 
-  removeDoneJobs() {
-    for (const [id, job] of this.jobs) {
-      if (job.status === "Done") {
-        this.jobs.delete(id);
-      }
+    const doneJobs = [...this.jobs.values()]
+      .filter((job) => job.status === "Done")
+      .map((job) => this.toJobSummary(job));
+
+    for (const job of doneJobs) {
+      this.jobs.delete(job.id);
     }
+
+    return doneJobs;
   }
 
-  updateStatuses() {
+  list() {
+    this.updateJobStatuses();
+    return [...this.jobs.values()].map((job) => this.toJobSummary(job));
+  }
+
+  private getNextJobId() {
+    let nextId = 1;
+    while (this.jobs.has(nextId)) {
+      nextId += 1;
+    }
+    return nextId;
+  }
+
+  private updateJobStatuses() {
     for (const job of this.jobs.values()) {
       if (job.status === "Running" && job.child.exitCode !== null) {
         job.status = "Done";
@@ -58,18 +77,13 @@ export class JobManager {
     }
   }
 
-  reapDoneJobs() {
-    this.updateStatuses();
-    const doneJobs = [...this.jobs.values()].filter((job) => job.status === "Done");
-    for (const job of doneJobs) {
-      this.jobs.delete(job.id);
-    }
-    return doneJobs;
-  }
-
-  list() {
-    this.updateStatuses();
-    return [...this.jobs.values()];
+  private toJobSummary(job: JobRecord): BackgroundJob {
+    return {
+      id: job.id,
+      pid: job.pid,
+      command: job.command,
+      status: job.status,
+    };
   }
 }
 
@@ -94,32 +108,31 @@ export class CommandExecutor {
     }
 
     const executable = resolveFromPath(command);
-
-    if (executable) {
-      if (background) {
-        const child = spawnExternalCommand(executable, args, command, stdout, stderr);
-        const commandString = args.length > 0 ? `${command} ${args.join(" ")}` : command;
-
-        if (typeof child.pid === "number") {
-          const job = this.jobManager.add(commandString, child.pid, child);
-          console.log(`[${job.id}] ${job.pid}`);
-
-          child.on("exit", () => {
-            this.jobManager.markDone(job.id);
-          });
-        }
-
-        child.on("error", (error) => {
-          stderr.write(`${command}: ${error.message}\n`);
-        });
-
-        return;
-      }
-
-      await runExternalCommand(executable, args, command, stdout, stderr);
+    if (!executable) {
+      console.log(`${command}: command not found`);
       return;
     }
 
-    console.log(`${command}: command not found`);
+    if (background) {
+      const child = spawnExternalCommand(executable, args, command, stdout, stderr);
+      const commandString = args.length > 0 ? `${command} ${args.join(" ")}` : command;
+
+      if (typeof child.pid === "number") {
+        const job = this.jobManager.add(commandString, child.pid, child);
+        console.log(`[${job.id}] ${job.pid}`);
+
+        child.on("exit", () => {
+          this.jobManager.markDone(job.id);
+        });
+      }
+
+      child.on("error", (error) => {
+        stderr.write(`${command}: ${error.message}\n`);
+      });
+
+      return;
+    }
+
+    await runExternalCommand(executable, args, command, stdout, stderr);
   }
 }
