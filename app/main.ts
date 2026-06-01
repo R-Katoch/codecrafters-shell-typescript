@@ -40,7 +40,8 @@ class Shell {
     this.rl.on("line", async (input: string) => {
       const parsed = parse(input);
       await this.handleInput(parsed);
-      this.reapJobsBeforePrompt(parsed.command !== "jobs");
+      await this.waitForBackgroundEvents();
+      await this.reapJobsBeforePrompt(parsed.command !== "jobs");
       this.rl.prompt();
     });
 
@@ -54,7 +55,11 @@ class Shell {
     await executor.execute(parsed);
   }
 
-  private reapJobsBeforePrompt(showNotifications = true) {
+  private async waitForBackgroundEvents() {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  private async reapJobsBeforePrompt(showNotifications = true) {
     if (!showNotifications) return;
 
     const doneJobs = jobManager.reapDoneJobs();
