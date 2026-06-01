@@ -56,7 +56,7 @@ class Shell {
   }
 
   private async waitForBackgroundEvents() {
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setImmediate(resolve));
   }
 
   private async reapJobsBeforePrompt(showNotifications = true) {
