@@ -11,7 +11,7 @@ export class JobsCommand implements Command {
     if (jobs.length === 0) return;
 
     const mostRecentJob = jobs[jobs.length - 1];
-    const previousJob = this.getPreviousJob(jobs, mostRecentJob);
+    const previousJob = this.getPreviousJob(jobs);
 
     for (const job of jobs) {
       const marker =
@@ -28,21 +28,8 @@ export class JobsCommand implements Command {
     }
   }
 
-  private getPreviousJob(
-    jobs: Array<{ id: number; status: string }>,
-    mostRecentJob: { id: number; status: string },
-  ) {
+  private getPreviousJob(jobs: Array<{ id: number; status: string }>) {
     if (jobs.length < 2) return undefined;
-
-    if (mostRecentJob.status === "Running") {
-      return jobs[jobs.length - 2];
-    }
-
-    return (
-      [...jobs]
-        .slice(0, jobs.length - 1)
-        .reverse()
-        .find((job) => job.status === "Running") ?? jobs[jobs.length - 2]
-    );
+    return jobs[jobs.length - 2];
   }
 }
