@@ -1,5 +1,6 @@
 import type { ParsedCommand } from "../types";
 import type { ExecutorContext } from "../types";
+import type { ChildProcessWithoutNullStreams } from "child_process";
 
 import { resolveFromPath } from "../helper/path-resolver";
 import { runExternalCommand, spawnExternalCommand } from "../helper/external-comand";
@@ -9,31 +10,56 @@ type BackgroundJob = {
   id: number;
   pid: number;
   command: string;
-  status: "Running";
+  status: "Running" | "Done";
+  child: ChildProcessWithoutNullStreams;
 };
 
 export class JobManager {
   private nextJobId = 1;
   private jobs = new Map<number, BackgroundJob>();
 
-  add(command: string, pid: number) {
+  add(command: string, pid: number, child: ChildProcessWithoutNullStreams) {
     const id = this.nextJobId++;
     const job: BackgroundJob = {
       id,
       pid,
       command,
       status: "Running",
+      child,
     };
 
     this.jobs.set(id, job);
     return job;
   }
 
+  markDone(jobId: number) {
+    const job = this.jobs.get(jobId);
+    if (!job) return;
+    job.status = "Done";
+  }
+
   remove(jobId: number) {
     this.jobs.delete(jobId);
   }
 
+  removeDoneJobs() {
+    for (const [id, job] of this.jobs) {
+      if (job.status === "Done") {
+        this.jobs.delete(id);
+      }
+    }
+  }
+
+  updateStatuses() {
+    for (const job of this.jobs.values()) {
+      if (job.status === "Running" && job.child.exitCode !== null) {
+        job.status = "Done";
+      }
+    }
+  }
+
   list() {
+    this.updateStatuses();
     return [...this.jobs.values()];
   }
 }
@@ -66,11 +92,11 @@ export class CommandExecutor {
         const commandString = args.length > 0 ? `${command} ${args.join(" ")}` : command;
 
         if (typeof child.pid === "number") {
-          const job = this.jobManager.add(commandString, child.pid);
+          const job = this.jobManager.add(commandString, child.pid, child);
           console.log(`[${job.id}] ${job.pid}`);
 
-          child.on("close", () => {
-            this.jobManager.remove(job.id);
+          child.on("exit", () => {
+            this.jobManager.markDone(job.id);
           });
         }
 
