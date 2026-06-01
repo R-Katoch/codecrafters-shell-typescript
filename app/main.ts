@@ -60,10 +60,9 @@ class Shell {
   }
 
   private async reapJobsBeforePrompt(showNotifications = true) {
-    if (!showNotifications) return;
-
     const doneJobs = jobManager.reapDoneJobs();
     if (doneJobs.length === 0) return;
+    if (!showNotifications) return;
 
     const mostRecentJob = doneJobs[doneJobs.length - 1];
     const previousJob = doneJobs.length > 1 ? doneJobs[doneJobs.length - 2] : undefined;
