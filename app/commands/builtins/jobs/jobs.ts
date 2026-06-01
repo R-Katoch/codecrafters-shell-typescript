@@ -23,7 +23,5 @@ export class JobsCommand implements Command {
       const trailing = job.status === "Running" ? " &" : "";
       context.stdout.write(`[${job.id}]${marker}  ${status}${job.command}${trailing}\n`);
     }
-
-    this.jobManager.removeDoneJobs();
   }
 }
