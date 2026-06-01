@@ -14,6 +14,12 @@ export function parse(input: string): ParsedCommand {
   const tokens = tokenize(input);
   const redirects: Redirect[] = [];
   const args: string[] = [];
+  let background = false;
+
+  if (tokens.length > 0 && tokens[tokens.length - 1] === "&") {
+    background = true;
+    tokens.pop();
+  }
 
   for (let i = 1; i < tokens.length; i++) {
     const token = tokens[i];
@@ -28,8 +34,9 @@ export function parse(input: string): ParsedCommand {
   }
 
   return {
-    command: tokens[0],
+    command: tokens[0] ?? "",
     args,
     redirects,
+    background,
   };
 }
