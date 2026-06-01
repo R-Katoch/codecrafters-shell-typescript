@@ -40,11 +40,31 @@ async function handleInput(input: string) {
   await executor.execute(parsed);
 }
 
+function reapJobsBeforePrompt() {
+  const doneJobs = jobManager.reapDoneJobs();
+  if (doneJobs.length === 0) return;
+
+  const mostRecentJob = doneJobs[doneJobs.length - 1];
+  const previousJob = doneJobs.length > 1 ? doneJobs[doneJobs.length - 2] : undefined;
+
+  for (const job of doneJobs) {
+    const marker = job.id === mostRecentJob.id
+      ? "+"
+      : job.id === previousJob?.id
+      ? "-"
+      : " ";
+    const status = job.status.padEnd(24, " ");
+    process.stdout.write(`[${job.id}]${marker}  ${status}${job.command}\n`);
+  }
+}
+
 // INPUT LOOP
+reapJobsBeforePrompt();
 rl.prompt();
 
 rl.on("line", async (input: string) => {
   await handleInput(input);
+  reapJobsBeforePrompt();
   rl.prompt();
 });
 

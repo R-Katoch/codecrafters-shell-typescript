@@ -58,6 +58,15 @@ export class JobManager {
     }
   }
 
+  reapDoneJobs() {
+    this.updateStatuses();
+    const doneJobs = [...this.jobs.values()].filter((job) => job.status === "Done");
+    for (const job of doneJobs) {
+      this.jobs.delete(job.id);
+    }
+    return doneJobs;
+  }
+
   list() {
     this.updateStatuses();
     return [...this.jobs.values()];
