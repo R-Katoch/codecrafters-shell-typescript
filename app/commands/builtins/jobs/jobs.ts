@@ -30,6 +30,17 @@ export class JobsCommand implements Command {
 
   private getPreviousJob(jobs: Array<{ id: number; status: string }>) {
     if (jobs.length < 2) return undefined;
-    return jobs[jobs.length - 2];
+
+    const mostRecentJob = jobs[jobs.length - 1];
+    if (mostRecentJob.status === "Running") {
+      return jobs[jobs.length - 2];
+    }
+
+    return (
+      [...jobs]
+        .slice(0, jobs.length - 1)
+        .reverse()
+        .find((job) => job.status === "Running") ?? jobs[jobs.length - 2]
+    );
   }
 }
